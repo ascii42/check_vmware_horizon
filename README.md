@@ -8,3 +8,4 @@ Mandantory tools:
 - Bash
 - awk
 - jq
+- curl
