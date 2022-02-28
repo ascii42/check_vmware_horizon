@@ -78,19 +78,41 @@ Options:
  -ePO--enable-pod
     Enable POD check
  -A|--enable-all
-    Enable all available SNMP checks.
+    Enable all available checks.
  -w, --warning <integer>
-    Set WARNING status if more than INTEGER is used,
-    if --enable-all ist set, defaults are used
+    Set WARNING status for sessions 
+    if --enable-all ist set, warning will match on all sessions.
  -c, --critical <integer>
-    Set CRITICAL status if more than INTEGER is used,
-    if --enable-all ist set, defaults are used
+    Set CRITICAL status for sessions 
+    if --enable-all ist set, critical will match on all sessions.
+ -wCtS|--warning-cs-total-session  <integer>
+    Set if you want to enable Warning on Connection Server total sessions.
+    This will overwrite -w --warning
+ -cCtS|--critical-cs-total-session  <integer>
+    Set if you want to enable Critical on Connection Server total sessions.
+    This will overwrite -c --critical <integer>
+ -wCcS|--warning-cs-current-session <integer>
+    Set if you want to enable Warning on Connection Server current sessions.
+    This will overwrite -w --warning
+ -cCcS|--critical-cs-current-session <integer>
+    Set if you want to enable Critical on Connection Server current sessions.
+    This will overwrite -c --critical
+ -wGcS|--warning-gw-current-session <integer>
+    Set if you want to enable Warning on Gateway Server current sessions.
+    This will overwrite -w --warning
+ -cGcS|--critical-gw-current-session <integer>
+    Set if you want to enable Critical on Gateway Server current sessions.
+    This will overwrite -c --critical
+ -wCce|--warning-cs-cert-expire <integer>
+    Set if you want to warn on Connection Server Certificate expire. (Days)
+ -cCce|--critical-cs-cert-expire <integer>
+    Set if you want to critical on Connection Server Certificate expire. (Days)
  -s, --silent
     Silent all extra output
  -v, --verbose
     Print extra Information
 
-Example: ${PROGNAME} -H <hostname> -P <PASSWORD> -D <DOMAIN> -A
+Example: ${PROGNAME} -H <hostname> -P <PASSWORD> -D <DOMAIN> -A -w 50 -c 100 -v
 
 EOM
 }
@@ -166,6 +188,46 @@ while [[ -n "${1}" ]]; do
                 critical="${1//%}"
                 [[ "${critical}" =~ [0-9].* ]] || exit_unknown "${1}"
                 ;;
+        -wCtS|--warning-cs-total-sessions)
+                shift
+                cs_total_sessions_warn="${1//%}"
+                [[ "${cs_total_sessions_warn}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -cCtS|--critical-cs-total-sessions)
+                shift
+                cs_total_sessions_crit="${1//%}"
+                [[ "${cs_total_sessions_crit}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -wCcS|--warning-cs-current-sessions)
+                shift
+                cs_current_sessions_warn="${1//%}"
+                [[ "${cs_current_sessions_warn}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -cCcS|--critical-cs-current-sessions)
+                shift
+                cs_current_sessions_crit="${1//%}"
+                [[ "${cs_current_sessions_crit}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -wGcS|--warning-gw-current-sessions)
+                shift
+                gw_current_sessions_warn="${1//%}"
+                [[ "${gw_current_sessions_warn}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -cGcS|--critical-gw-current-sessions)
+                shift
+                gw_current_sessions_crit="${1//%}"
+                [[ "${gw_current_sessions_crit}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -wCce|--warning-cs-cert-expire)
+                shift
+                cs_cert_warn="${1//%}"
+                [[ "${cs_cert_warn}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -cCce|--critical-cs-cert-expire)
+                shift
+                cs_cert_crit="${1//%}"
+                [[ "${cs_cert_crit}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
         -s|--silent)
                 silent=1
                 ;;
@@ -193,7 +255,6 @@ done
 
 # Set defaults
 [[ 
--z "${enable_gw}" && 
 -z "${enable_hvcs}" && 
 -z "${enable_db}" && 
 -z "${enable_ad}" && 
@@ -206,16 +267,57 @@ done
 -z "${enable_gw}" 
 ]] && enable_gw=1 && enable_hvcs=1
 
-## TODO
-cs_total_sessions_warn=50
-cs_total_sessions_crit=150
-cs_current_sessions_warn=50
-cs_current_sessions_crit=150
-gw_current_sessions_warn=50
-gw_current_sessions_crit=150
-cs_cert_warn=14
-cs_cert_crit=7
+
+[[ 
+-n "${enable_gw}" && 
+-n "${warning}" && 
+-n "${critical}" && 
+-z "${gw_current_sessions_warn}" && 
+-z "${gw_current_sessions_crit}" && 
+-z "${enable_hvcs}" && 
+-z "${enable_rds}" && 
+-z "${enable_all}"  
+]] && gw_current_sessions_warn="${warning}" && gw_current_sessions_crit="${critical}"
+[[ 
+-n "${enable_hvcs}" && 
+-n "${warning}" && 
+-n "${critical}" && 
+-z "${cs_current_sessions_warn}" && 
+-z "${cs_current_sessions_crit}" && 
+-z "${cs_total_sessions_warn}" && 
+-z "${cs_total_sessions_crit}" && 
+-z "${enable_gw}" && 
+-z "${enable_rds}" && 
+-z "${enable_all}"  
+]] && 
+cs_current_sessions_warn="${warning}" && cs_current_sessions_crit="${critical}" && 
+cs_total_sessions_warn="${warning}" && cs_total_sessions_crit="${critical}"
+
+[[ 
+-n "${warning}" && 
+-n "${critical}" && 
+-z "${cs_current_sessions_warn}" && 
+-z "${cs_current_sessions_crit}" && 
+-z "${gw_current_sessions_warn}" && 
+-z "${gw_current_sessions_crit}" && 
+-z "${cs_total_sessions_warn}" && 
+-z "${cs_total_sessions_crit}" && 
+-n "${enable_all}"  
+]] && 
+cs_current_sessions_warn="${warning}" && cs_current_sessions_crit="${critical}" && 
+cs_total_sessions_warn="${warning}" && cs_total_sessions_crit="${critical}" && 
+gw_current_sessions_warn="${warning}" && gw_current_sessions_crit="${critical}"
+
+[[ -z "${cs_total_sessions_warn}" ]] && cs_total_sessions_warn=50
+[[ -z "${cs_total_sessions_crit}" ]]&& cs_total_sessions_crit=150
+[[ -z "${cs_current_sessions_warn}" ]] && cs_current_sessions_warn=50
+[[ -z "${cs_current_sessions_crit}" ]] && cs_current_sessions_crit=150
+[[ -z "${gw_current_sessions_warn}" ]] && gw_current_sessions_warn=50
+[[ -z "${gw_current_sessions_crit}" ]] && gw_current_sessions_crit=150
+[[ -z "${cs_cert_warn}" ]] && cs_cert_warn=14
+[[ -z "${cs_cert_crit}" ]] && cs_cert_crit=7
 today=${EPOCHSECONDS}
+
 # Some Basic API settings
 #CURL_OPTS_POST="-k --tcp-fastopen -X POST "
 
