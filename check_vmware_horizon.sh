@@ -16,7 +16,7 @@
 ## VARIABLES
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
-REVISION="1.0.0"
+REVISION="0.1.0"
 JQ="$(which jq)"
 CURL="$(which curl)"
 AWK="$(which awk)"
@@ -32,6 +32,10 @@ exit_unknown() {
 ## FUNCTIONS
 print_usage() {
         echo "Usage: ${PROGNAME} [-h] [-V] -H <hostname> [-U <username>] [-P <password>] [-D <domain>] [-opts] [-w <warning>] [-c <critical>] [-v]"
+}
+
+print_revision() {
+        echo "${1} - v${2}"
 }
 
 print_help() {
