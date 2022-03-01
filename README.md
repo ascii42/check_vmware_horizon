@@ -5,8 +5,8 @@ Current State: beta
 
 This is a little monitoring-plugin (in Bash) vor check vmware horizon connection Servers.
 Mandantory tools: 
-- Bash
-- awk
-- jq
-- curl
+- `Bash`
+- `awk`
+- `jq`
+- `curl`
 
