@@ -18,6 +18,9 @@
 # 2023-04-15 Felix Longardt <monitoring@longardt.com>
 # Release: 0.1.1
 #   Bugfixies help and switches
+# 2023-04-18 Felix Longardt <monitoring@longardt.com>
+# Release: 0.1.2
+#   Bugfixies datastoress->datastores
 
 ## VARIABLES
 PROGNAME="${0##*/}"
@@ -858,7 +861,7 @@ if [[ -n "$enable_vc" || -n "$enable_all" ]]; then
 	for countds in "${!vc_ds_name[@]}"
              do
 		if [[ -n "${verbose}" ]]; then 
-                horizon_output+="Status of Datastoress ${vc_ds_name[countds]}:\n---------------------------------------\n"
+                horizon_output+="Status of Datastores ${vc_ds_name[countds]}:\n---------------------------------------\n"
 		fi
 		if [[ "${vc_ds_state[countds]}" == "NOT_ACCESSIBLE" ]]; then 
                 	horizon_output+="[CRITICAL] - Datastore ${vc_ds_name[countds]} is not accessible\n" 
