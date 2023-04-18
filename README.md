@@ -89,3 +89,106 @@ Options:
     Example: check_vmware_horizon.sh -H <hostname> -P <PASSWORD> -D <DOMAIN> -A -w 50 -c 100 -v
 
 ```
+## Output Example (verbose):
+```
+Plugin Output:
+Status of Connection Server: MyConnectionServer
+---------------------------------------
+[OK] - Status of MyConnectionServer (Version: 8.0.0 Build: 10000000) is OK
+[OK] - Status of Security Gateway UP
+[OK] - PCoIP Gateway UP
+[OK] - BLAST Gateway UP
+[OK] - Replication to peer MyConnectionServer2 is OK
+[OK] - Certificate from MyConnectionServer is valid
+[OK] - Default Cetificate is not in use
+[OK] - Certificate is valid and will be expire on Tue 30 Mar 3000 12:00:00 PM CEST
+[OK] - Session Count Total: 14, Current Connections: 9, Tunnel Connections: 0, Session Protocol: BLAST
+---------------------------------------
+
+Status of Connection Server: MyConnectionServer2
+---------------------------------------
+[OK] - Status of MyConnectionServer2 (Version: 8.0.0 Build: 10000000) is OK
+[OK] - Status of Security Gateway UP
+[OK] - PCoIP Gateway UP
+[OK] - BLAST Gateway UP
+[OK] - Replication to peer MyConnectionServer is OK
+[OK] - Certificate from MyConnectionServer is valid
+[OK] - Default Cetificate is not in use
+[OK] - Certificate is valid and will be expire on Tue 30 Mar 3000 12:00:00 PM CEST
+[OK] - Session Count Total: 14, Current Connections: 9, Tunnel Connections: 0, Session Protocol: BLAST
+---------------------------------------
+
+Status of Unified Access Gateway: MyUAG
+---------------------------------------
+[OK] - Status of MyUAG (Version: 01.01 Type: UAG Location: external) is OK
+[OK]  - Session Count Total: 8, Current Blast Connections: 8, Current PCoIP Connections: 0
+---------------------------------------
+
+Status of Active Directory on MyConnectionServer:
+---------------------------------------
+Connection Server: MyConnectionServer
+[OK] - Domain Status: FULLY_ACCESSIBLE
+Domain Relation: PRIMARY_DOMAIN
+Domain DNS Name: my.domain 
+Domain Netbios Name: MY
+Domain is NT4 Domain: false 
+---------------------------------------
+
+Status of Active Directory on MyConnectionServer2:
+---------------------------------------
+Connection Server: MyConnectionServer2
+[OK] - Domain Status: FULLY_ACCESSIBLE
+Domain Relation: PRIMARY_DOMAIN
+Domain DNS Name: my.domain 
+Domain Netbios Name: MY
+Domain is NT4 Domain: false 
+---------------------------------------
+
+Status of Horizon EventDB:
+---------------------------------------
+[OK] - Database Status: CONNECTED 
+DB-Host: db.my.domain
+DB-Port: 5432
+DB-Type: POSTGRESQL
+Database: event
+DB-Prefix: no prefix configured
+DB-User: dbuser
+DB-Events: 100000
+---------------------------------------
+
+Status of vCenter:
+---------------------------------------
+vCenter Name: https://vcenter.my.domain:443/sdk
+vCenter ID: 0000000-0000-0000-0000-0000000000
+vCenter Build: 10000000
+vCenter Version: 1.0.0
+Desktop Pools: 2
+---------------------------------------
+
+Status of MyConnectionServer connection to vCenter:
+---------------------------------------
+[OK] - MyConnectionServer connected to vcenter
+vCenter Certificate valid: false
+Certificate Thumbprint trust: true
+---------------------------------------
+
+Status of MyConnectionServer2 connection to vCenter:
+---------------------------------------
+[OK] - MyConnectionServer2 connected to vcenter
+vCenter Certificate valid: false
+Certificate Thumbprint trust: true
+---------------------------------------
+
+Status of ESXi Server esx.my.domain:
+---------------------------------------
+[OK] - Server is conneted to vcenter
+ESX Name: esx.my.domain
+Cluster: MyCluster
+API-Version: 1.0.0.0
+Version: 1.0.0
+GPU-Available: true
+CPU-Cores: 132
+CPU: 50000 MHz
+Memory: 1000000 MB
+---------------------------------------
+```
