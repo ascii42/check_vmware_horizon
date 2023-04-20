@@ -21,6 +21,9 @@
 # 2023-04-18 Felix Longardt <monitoring@longardt.com>
 # Release: 0.1.2
 #   Bugfixies datastoress->datastores
+# 2023-04-20 Felix Longardt <monitoring@longardt.com>
+# Release: 0.1.3
+#   Bugfix Certificate Expire Warning
 
 ## VARIABLES
 PROGNAME="${0##*/}"
@@ -496,7 +499,7 @@ if [[ -n "$enable_hvcs" || -n "$enable_all" ]]; then
 		if [[ "${today}" -ge "${cscertexpirec}" ]]; then
 			horizon_output+="[CRITICAL] - Certificate expires on ${cscertexpire}\n"
 			horizon_problem_output+="[CRITICAL] - Connection Server - Certificate expires on ${cscertexpire}\n"
-		elif [[  "${today}" -ge "${cscertexpirec}" ]]; then
+		elif [[  "${today}" -ge "${cscertexpirew}" ]]; then
 			horizon_output+="[WARNING] - Certificate expires on ${cscertexpire}\n"
 			horizon_problem_output+="[WARNING] - Connection Server - Certificate expires on ${cscertexpire}\n"
 		elif [[ "${today}" -lt "${cscertexpirec}" && "${today}" -lt "${cscertexpirew}" ]]; then
