@@ -41,6 +41,8 @@ Options:
     Enable Event DB check
  -eAD, --enable-ad
     Enable AD-Domain check
+  -eAV, --enable-appvolume
+    Enable AppVolume check
  -eRDS, --enable-rds
     Enable RDS Server check
  -eFA, --enable-farms
@@ -89,6 +91,12 @@ Options:
     Example: check_vmware_horizon.sh -H <hostname> -P <PASSWORD> -D <DOMAIN> -A -w 50 -c 100 -v
 
 ```
+
+## Usage Example:
+```
+./check_vmware_horizon.sh -D' my.domain -H MyConnectionServer -P MySecretPassword -U MyUSER
+```
+
 ## Output Example (verbose):
 ```
 Plugin Output:
