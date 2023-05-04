@@ -10,6 +10,9 @@ This is a little monitoring-plugin (in Bash) vor check vmware horizon connection
 - `jq`
 - `curl`
 
+## How it Works:
+The Script is calling the vmware horizon api.
+
 ## Options:
 ```
 Usage: check_vmware_horizon.sh [-h] [-V] -H <hostname> [-U <username>] [-P <password>] [-D <domain>] [-opts] [-w <warning>] [-c <critical>] [-v]
