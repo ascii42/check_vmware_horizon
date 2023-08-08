@@ -33,11 +33,14 @@
 # 2023-04-27 Felix Longardt <monitoring@longardt.com>
 # Release: 1.0.0
 #   Some Error handling
+# 2023-08-08 Felix Longardt <monitoring@longardt.com>
+# Release: 1.0.1
+#   Bugfixies in appvolume error buffer
 
 ## VARIABLES
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
-REVISION="1.0.0"
+REVISION="1.0.1"
 JQ="$(which jq)"
 CURL="$(which curl)"
 AWK="$(which awk)"
@@ -839,7 +842,7 @@ if [[ -n "$enable_av" || -n "$enable_all" ]]; then
                         do
                         if [[ "${av_cs_state[countavcs]}" == "ERROR" ]]; then
                                 horizon_output+="${status_crit} - Connection Server ${av_cs_name[countavcs]} could not contact ${av_url[countav]}\n"
-                                horizon_problem_output+"${status_crit} - Connection Server ${av_cs_name[countavcs]} could not contact ${av_url[countav]}\n" =
+                                horizon_problem_output+="${status_crit} - Connection Server ${av_cs_name[countavcs]} could not contact ${av_url[countav]}\n"
                         elif [[ "${av_cs_state[countavcs]}" == "OK" ]]; then
                                 if [[ -n "${verbose}" ]]; then
                                 horizon_output+="${status_ok} - Connection Server ${av_cs_name[countavcs]} is connected to ${av_url[countav]}\n"
@@ -853,7 +856,7 @@ if [[ -n "$enable_av" || -n "$enable_all" ]]; then
                         done
                 if [[ "${av_desc[countav]}" == "PROBLEM" ]]; then
                         horizon_output+="${status_crit} - Problem in Connection detected\n"
-                        horizon_problem_output+"${status_crit} - Problem in Connection detected\n" =
+                        horizon_problem_output+="${status_crit} - Problem in Connection detected\n"
                 elif [[ "${av_desc[countav]}" == "SUCCESS" ]]; then
                         if [[ -n "${verbose}" ]]; then
                         horizon_output+="${status_ok} - No Connection Problem\n"
@@ -866,7 +869,7 @@ if [[ -n "$enable_av" || -n "$enable_all" ]]; then
                 fi
                 if [[ "${av_state[countav]}" == "ERROR" ]]; then
                         horizon_output+="${status_crit} - ${av_url[countav]} Status is Error\n"
-                        horizon_problem_output+"${status_crit} - ${av_url[countav]} Status is Error\n" =
+                        horizon_problem_output+="${status_crit} - ${av_url[countav]} Status is Error\n"
                 elif [[ "${av_state[countav]}" == "OK" ]]; then
                         if [[ -n "${verbose}" ]]; then
                         horizon_output+="${status_ok} - ${av_url[countav]} Status is Ok\n"
