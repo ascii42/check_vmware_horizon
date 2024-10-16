@@ -84,7 +84,7 @@ Options:
     Set Password for Login
  -D, --domain <domain>
     Set Domain for Login
- -eCS, ---enable-connectionserver
+ -eCS, --enable-connectionserver
     Enable Connection Server check
  -eGW, --enable-gateway
     Enable Gateway check
@@ -175,7 +175,7 @@ while [[ -n "${1}" ]]; do
                 shift
                 api_domain="${1}"
                 ;;
-        -eCS|---enable-connectionserver)
+        -eCS|--enable-connectionserver)
                 enable_hvcs=1
                 ;;
         -eGW|--enable-gateway)
