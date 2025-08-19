@@ -1,7 +1,10 @@
 # check_vmware_horizon
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Shell](https://img.shields.io/badge/shell-bash-green.svg)](https://www.gnu.org/software/bash/)
+[![Version](https://img.shields.io/badge/version-1.0.1-orange.svg)](CHANGELOG.md)
+
 Icinga/ Nagios check for vmware Horizon
 
-Current State: beta
 
 This is a little monitoring-plugin (in Bash) vor check vmware horizon connection Servers.
 ## Requirements: 
@@ -203,3 +206,7 @@ CPU: 50000 MHz
 Memory: 1000000 MB
 ---------------------------------------
 ```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
