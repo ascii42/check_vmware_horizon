@@ -295,6 +295,12 @@ For support, please:
 2. Review existing GitHub issues
 3. Create a new issue with detailed information about your environment and the problem
 
+## 👨‍💻 Author
+
+**Felix Longardt**
+- Email: monitoring@longardt.com
+- GitHub: [@ascii42](https://github.com/ascii42)
+
 ## Acknowledgments
 
 - VMware for the Horizon API documentation
