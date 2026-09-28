@@ -36,11 +36,14 @@
 # 2023-08-08 Felix Longardt <monitoring@longardt.com>
 # Release: 1.0.1
 #   Bugfixies in appvolume error buffer
+# 2026-09-28 Felix Longardt <monitoring@longardt.com>
+# Release: 1.0.2
+#   Added Critical vCenter VMs Counter
 
 ## VARIABLES
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
-REVISION="1.0.1"
+REVISION="1.0.2"
 JQ="$(which jq)"
 CURL="$(which curl)"
 AWK="$(which awk)"
@@ -106,6 +109,8 @@ Options:
     Enable True SSO check
  -ePO, --enable-pod
     Enable POD check
+ -eVCVM, --enable-vcenter-critical-vm
+    Enable vCenter critical VMs check (problem_vcenter_vms_count via /rest/monitor/v2/system-metrics)
  -A, --enable-all
     Enable all available checks.
  -w, --warning <integer>
@@ -132,6 +137,10 @@ Options:
  -cGcS, --critical-gw-current-session <integer>
     Set if you want to enable Critical on Gateway Server current sessions.
     This will overwrite -c --critical
+ -wVCVM, --warning-vcenter-problem-vms <integer>
+    Set WARNING threshold for problem vCenter VMs count (from system-metrics endpoint)
+ -cVCVM, --critical-vcenter-problem-vms <integer>
+    Set CRITICAL threshold for problem vCenter VMs count (from system-metrics endpoint)
  -wCce, --warning-cs-cert-expire <integer>
     Set if you want to warn on Connection Server Certificate expire. (Days)
  -cCce, --critical-cs-cert-expire <integer>
@@ -208,6 +217,9 @@ while [[ -n "${1}" ]]; do
         -eRDS|--enable-rds)
                 enable_rds=1
                 ;;
+        -eVCVM|--enable-vcenter-critical-vm)
+                enable_vcvm=1
+                ;;
         -A|--enable-all)
                 enable_all=1
                 ;;
@@ -250,6 +262,16 @@ while [[ -n "${1}" ]]; do
                 shift
                 gw_current_sessions_crit="${1//%}"
                 [[ "${gw_current_sessions_crit}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -wVCVM|--warning-vcenter-problem-vms)
+                shift
+                sm_vcvm_warn="${1}"
+                [[ "${sm_vcvm_warn}" =~ [0-9].* ]] || exit_unknown "${1}"
+                ;;
+        -cVCVM|--critical-vcenter-problem-vms)
+                shift
+                sm_vcvm_crit="${1}"
+                [[ "${sm_vcvm_crit}" =~ [0-9].* ]] || exit_unknown "${1}"
                 ;;
         -wCce|--warning-cs-cert-expire)
                 shift
@@ -299,6 +321,7 @@ done
 -z "${enable_tsso}" &&
 -z "${enable_rds}" &&
 -z "${enable_av}" &&
+-z "${enable_vcvm}" &&
 -z "${enable_all}" &&
 -z "${enable_gw}"
 ]] && enable_gw=1 && enable_hvcs=1
@@ -352,6 +375,8 @@ gw_current_sessions_warn="${warning}" && gw_current_sessions_crit="${critical}"
 [[ -z "${gw_current_sessions_crit}" ]] && gw_current_sessions_crit=150
 [[ -z "${cs_cert_warn}" ]] && cs_cert_warn=14
 [[ -z "${cs_cert_crit}" ]] && cs_cert_crit=7
+[[ -z "${sm_vcvm_warn}" ]] && sm_vcvm_warn=1
+[[ -z "${sm_vcvm_crit}" ]] && sm_vcvm_crit=5
 today=${EPOCHSECONDS}
 
 # Statusvars
@@ -1448,6 +1473,45 @@ if [[ -n "$enable_pod" || -n "$enable_all" ]]; then
         fi
         fi
 fi
+# System Metrics Api Call
+if [[ -n "$enable_vcvm" || -n "$enable_all" ]]; then
+        sm_buffer=`${api_cmd_get}/rest/monitor/v2/system-metrics -H "${CURL_OPTS_AUTH}" -H "${CURL_OPTS_JSON}"`
+        if [[ "${sm_buffer}" =~ "status" && "${sm_buffer}" =~ "error" ]]; then
+        sm_buffer_state=(`echo "${sm_buffer}" | "${JQ}" --unbuffered -r '.status' | "${AWK}" 1 ORS=' '`)
+        fi
+        if [[ -z "${sm_buffer_state}" && -n "${sm_buffer}" && "${sm_buffer}" != "null" ]]; then
+        sm_problem_vcvm=`echo "${sm_buffer}" | "${JQ}" --unbuffered -r '.problem_vcenter_vms_count // 0'`
+                if [[ -n "${verbose}" ]]; then
+                horizon_output+="vCenter Critical VMs:\n---------------------------------------\n"
+                horizon_output+="Problem vCenter VMs: ${sm_problem_vcvm}\n"
+                fi
+                if [[ "${sm_problem_vcvm}" -ge "${sm_vcvm_crit}" ]]; then
+                        horizon_output+="${status_crit} - Problem vCenter VMs: ${sm_problem_vcvm} (threshold: ${sm_vcvm_crit})\n"
+                        horizon_problem_output+="${status_crit} - vCenter Critical VMs - Problem vCenter VMs: ${sm_problem_vcvm}\n"
+                elif [[ "${sm_problem_vcvm}" -ge "${sm_vcvm_warn}" ]]; then
+                        horizon_output+="${status_warn} - Problem vCenter VMs: ${sm_problem_vcvm} (threshold: ${sm_vcvm_warn})\n"
+                        horizon_problem_output+="${status_warn} - vCenter Critical VMs - Problem vCenter VMs: ${sm_problem_vcvm}\n"
+                else
+                        horizon_output+="${status_ok} - Problem vCenter VMs: ${sm_problem_vcvm}\n"
+                fi
+                if [[ -n "${verbose}" ]]; then
+                horizon_output+="---------------------------------------\n\n"
+                fi
+                horizon_perf+=" problem_vcenter_vms=${sm_problem_vcvm};${sm_vcvm_warn};${sm_vcvm_crit}"
+        elif [[ -n "${sm_buffer_state}" ]]; then
+                if [[ -n "${verbose}" ]]; then
+                horizon_output+="vCenter Critical VMs:\n---------------------------------------\n${status_unkn} - Returned Statuscode: ${sm_buffer_state}\n"
+                horizon_output+="---------------------------------------\n\n"
+                fi
+        else
+                if [[ -n "${verbose}" ]]; then
+                horizon_output+="vCenter Critical VMs:\n---------------------------------------\n${status_unkn} - No system metrics data returned\n"
+                horizon_output+="---------------------------------------\n\n"
+                fi
+        fi
+        unset sm_buffer sm_buffer_state sm_problem_vcvm
+fi
+
 api_disconnect=`${api_cmd_post}/rest/logout -H "${CURL_OPTS_JSON}" -d '{
                 "refresh_token": "'"${api_connect[1]}"'"
                 }'`
